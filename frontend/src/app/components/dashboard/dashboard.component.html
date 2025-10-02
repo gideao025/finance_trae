@@ -1,0 +1,184 @@
+<div class="dashboard-container">
+  <!-- Header Section -->
+  <div class="dashboard-header">
+    <div class="welcome-section">
+      <h1 class="welcome-title">
+        {{ getGreeting() }}, {{ currentUser?.nome }}! 👋
+      </h1>
+      <p class="welcome-subtitle">
+        Aqui está um resumo das suas finanças
+      </p>
+    </div>
+    
+    <div class="header-actions">
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="refreshData()"
+        [disabled]="loading">
+        <mat-icon>refresh</mat-icon>
+        Atualizar
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Carregando dados...</p>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!loading" class="dashboard-content">
+    
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+      <mat-card 
+        *ngFor="let card of dashboardCards" 
+        class="summary-card"
+        [ngClass]="'card-' + card.color">
+        <mat-card-content>
+          <div class="card-header">
+            <div class="card-icon">
+              <mat-icon>{{ card.icon }}</mat-icon>
+            </div>
+            <div class="card-trend" *ngIf="card.trend">
+              <mat-icon [ngClass]="card.trend.isPositive ? 'trend-up' : 'trend-down'">
+                {{ card.trend.isPositive ? 'trending_up' : 'trending_down' }}
+              </mat-icon>
+              <span>{{ card.trend.value }}%</span>
+            </div>
+          </div>
+          
+          <div class="card-content">
+            <h3 class="card-title">{{ card.title }}</h3>
+            <p class="card-value">{{ card.value }}</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Charts and Recent Transactions -->
+    <div class="dashboard-grid">
+      
+      <!-- Financial Summary Chart -->
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>Resumo Financeiro</mat-card-title>
+          <mat-card-subtitle>Receitas vs Despesas do mês</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-container" *ngIf="chartData">
+            <canvas 
+              baseChart
+              [data]="chartData"
+              [options]="chartOptions"
+              type="doughnut">
+            </canvas>
+          </div>
+          <div class="chart-legend">
+            <div class="legend-item">
+              <div class="legend-color success"></div>
+              <span>Receitas: {{ formatCurrency(resumoFinanceiro?.totalReceitas || 0) }}</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color error"></div>
+              <span>Despesas: {{ formatCurrency(resumoFinanceiro?.totalDespesas || 0) }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Recent Transactions -->
+      <mat-card class="transactions-card">
+        <mat-card-header>
+          <mat-card-title>Transações Recentes</mat-card-title>
+          <mat-card-subtitle>Últimas 5 transações</mat-card-subtitle>
+          <div class="card-actions">
+            <button 
+              mat-button 
+              color="primary"
+              (click)="navigateToTransacoes()">
+              Ver todas
+            </button>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="transactions-list" *ngIf="recentTransactions.length > 0">
+            <div 
+              *ngFor="let transaction of recentTransactions" 
+              class="transaction-item">
+              <div class="transaction-icon">
+                <mat-icon [ngClass]="getTransactionColor(transaction.tipo)">
+                  {{ getTransactionIcon(transaction.tipo) }}
+                </mat-icon>
+              </div>
+              
+              <div class="transaction-details">
+                <div class="transaction-description">
+                  {{ transaction.descricao }}
+                </div>
+                <div class="transaction-source">
+                  {{ transaction.conta || transaction.cartao }}
+                </div>
+              </div>
+              
+              <div class="transaction-amount">
+                <span [ngClass]="getTransactionColor(transaction.tipo)">
+                  {{ transaction.tipo === 'RECEITA' ? '+' : '-' }}{{ formatCurrency(Math.abs(transaction.valor)) }}
+                </span>
+                <div class="transaction-date">
+                  {{ transaction.data | date:'dd/MM' }}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div *ngIf="recentTransactions.length === 0" class="empty-state">
+            <mat-icon>receipt_long</mat-icon>
+            <p>Nenhuma transação encontrada</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <h2>Ações Rápidas</h2>
+      <div class="actions-grid">
+        
+        <mat-card class="action-card" (click)="navigateToContas()">
+          <mat-card-content>
+            <mat-icon>account_balance</mat-icon>
+            <h3>Contas</h3>
+            <p>{{ contas.length }} conta(s)</p>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="action-card" (click)="navigateToCartoes()">
+          <mat-card-content>
+            <mat-icon>credit_card</mat-icon>
+            <h3>Cartões</h3>
+            <p>{{ cartoes.length }} cartão(ões)</p>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="action-card" (click)="navigateToTransacoes()">
+          <mat-card-content>
+            <mat-icon>receipt</mat-icon>
+            <h3>Nova Transação</h3>
+            <p>Adicionar receita/despesa</p>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="action-card">
+          <mat-card-content>
+            <mat-icon>assessment</mat-icon>
+            <h3>Relatórios</h3>
+            <p>Análises detalhadas</p>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>

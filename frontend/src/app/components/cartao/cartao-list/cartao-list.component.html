@@ -1,0 +1,188 @@
+<div class="cartao-list-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">Cartões de Crédito</h1>
+      <p class="page-subtitle">Gerencie seus cartões de crédito</p>
+    </div>
+    <div class="header-actions">
+      <button mat-raised-button color="primary" (click)="navigateToNew()">
+        <mat-icon>add</mat-icon>
+        Novo Cartão
+      </button>
+      <button mat-stroked-button (click)="exportToCSV()">
+        <mat-icon>download</mat-icon>
+        Exportar
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <mat-card class="filter-card">
+    <mat-card-content>
+      <div class="filter-row">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Buscar cartões</mat-label>
+          <input matInput 
+                 [(ngModel)]="searchTerm" 
+                 (keyup.enter)="applyFilter()"
+                 placeholder="Nome do cartão...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Bandeira</mat-label>
+          <mat-select [(value)]="selectedBandeira" (selectionChange)="applyFilter()">
+            <mat-option value="">Todas</mat-option>
+            <mat-option *ngFor="let bandeira of bandeirasOptions" [value]="bandeira">
+              {{ bandeira }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <div class="filter-actions">
+          <button mat-raised-button color="primary" (click)="applyFilter()">
+            <mat-icon>search</mat-icon>
+            Filtrar
+          </button>
+          <button mat-button (click)="clearFilters()">
+            <mat-icon>clear</mat-icon>
+            Limpar
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Carregando cartões...</p>
+  </div>
+
+  <!-- Table -->
+  <mat-card *ngIf="!loading" class="table-card">
+    <div class="table-container">
+      <table mat-table [dataSource]="dataSource" matSort class="cartoes-table">
+        
+        <!-- Nome Column -->
+        <ng-container matColumnDef="nomeDoCartao">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Nome do Cartão</th>
+          <td mat-cell *matCellDef="let cartao" class="cartao-info">
+            <div class="cartao-details">
+              <mat-icon class="cartao-icon">credit_card</mat-icon>
+              <div class="cartao-text">
+                <span class="cartao-name">{{ cartao.nomeDoCartao }}</span>
+                <span class="cartao-number">**** {{ cartao.ultimosDigitos || '****' }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Bandeira Column -->
+        <ng-container matColumnDef="bandeira">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Bandeira</th>
+          <td mat-cell *matCellDef="let cartao">
+            <mat-chip-set>
+              <mat-chip class="bandeira-chip">
+                <mat-icon matChipAvatar>{{ getBandeiraIcon(cartao.bandeira) }}</mat-icon>
+                {{ cartao.bandeira }}
+              </mat-chip>
+            </mat-chip-set>
+          </td>
+        </ng-container>
+
+        <!-- Limite Total Column -->
+        <ng-container matColumnDef="limiteTotal">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Limite Total</th>
+          <td mat-cell *matCellDef="let cartao" class="limite-total">
+            {{ formatCurrency(cartao.limiteTotal) }}
+          </td>
+        </ng-container>
+
+        <!-- Limite Utilizado Column -->
+        <ng-container matColumnDef="limiteUtilizado">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Utilizado</th>
+          <td mat-cell *matCellDef="let cartao" class="limite-utilizado">
+            <div class="limite-info">
+              <span class="limite-value">{{ formatCurrency(cartao.limiteUtilizado || 0) }}</span>
+              <mat-progress-bar 
+                mode="determinate" 
+                [value]="getLimiteUtilizadoPercentage(cartao)"
+                [color]="getLimiteColor(getLimiteUtilizadoPercentage(cartao))"
+                class="limite-progress">
+              </mat-progress-bar>
+              <span class="limite-percentage">{{ getLimiteUtilizadoPercentage(cartao) | number:'1.0-1' }}%</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Limite Disponível Column -->
+        <ng-container matColumnDef="limiteDisponivel">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Disponível</th>
+          <td mat-cell *matCellDef="let cartao" class="limite-disponivel">
+            {{ formatCurrency(cartao.limiteDisponivel || 0) }}
+          </td>
+        </ng-container>
+
+        <!-- Vencimento Column -->
+        <ng-container matColumnDef="vencimento">
+          <th mat-header-cell *matHeaderCellDef>Vencimento</th>
+          <td mat-cell *matCellDef="let cartao" class="vencimento-info">
+            <div class="vencimento-details">
+              <span class="vencimento-text">{{ getVencimentoText(cartao.diaDeFechamento, cartao.diaDeVencimento) }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Ações</th>
+          <td mat-cell *matCellDef="let cartao" class="actions-cell">
+            <button mat-icon-button 
+                    [matTooltip]="'Visualizar cartão'"
+                    (click)="navigateToView(cartao)">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button mat-icon-button 
+                    [matTooltip]="'Editar cartão'"
+                    (click)="navigateToEdit(cartao)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button 
+                    [matTooltip]="'Excluir cartão'"
+                    color="warn"
+                    (click)="deleteCartao(cartao)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      <!-- Empty State -->
+      <div *ngIf="dataSource.data.length === 0" class="empty-state">
+        <mat-icon class="empty-icon">credit_card_off</mat-icon>
+        <h3>Nenhum cartão encontrado</h3>
+        <p>Não há cartões cadastrados ou que correspondam aos filtros aplicados.</p>
+        <button mat-raised-button color="primary" (click)="navigateToNew()">
+          <mat-icon>add</mat-icon>
+          Cadastrar Primeiro Cartão
+        </button>
+      </div>
+    </div>
+
+    <!-- Paginator -->
+    <mat-paginator 
+      *ngIf="dataSource.data.length > 0"
+      [length]="totalElements"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [showFirstLastButtons]="true"
+      (page)="onPageChange()"
+      aria-label="Selecione a página dos cartões">
+    </mat-paginator>
+  </mat-card>
+</div>

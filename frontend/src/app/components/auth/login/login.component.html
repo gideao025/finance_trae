@@ -1,0 +1,90 @@
+<div class="login-container">
+  <div class="login-card">
+    <!-- Header -->
+    <div class="login-header">
+      <div class="logo">
+        <mat-icon class="logo-icon">account_balance_wallet</mat-icon>
+        <h1>Controle Financeiro</h1>
+      </div>
+      <p class="subtitle">Faça login para acessar sua conta</p>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <!-- Email Field -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email</mat-label>
+        <input 
+          matInput 
+          type="email" 
+          formControlName="email"
+          placeholder="seu@email.com"
+          autocomplete="email">
+        <mat-icon matSuffix>email</mat-icon>
+        <mat-error *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+          {{ getErrorMessage('email') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Password Field -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Senha</mat-label>
+        <input 
+          matInput 
+          [type]="hidePassword ? 'password' : 'text'" 
+          formControlName="senha"
+          placeholder="Digite sua senha"
+          autocomplete="current-password">
+        <button 
+          mat-icon-button 
+          matSuffix 
+          type="button"
+          (click)="togglePasswordVisibility()"
+          [attr.aria-label]="'Hide password'"
+          [attr.aria-pressed]="hidePassword">
+          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error *ngIf="loginForm.get('senha')?.invalid && loginForm.get('senha')?.touched">
+          {{ getErrorMessage('senha') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Submit Button -->
+      <button 
+        mat-raised-button 
+        color="primary" 
+        type="submit"
+        class="login-button full-width"
+        [disabled]="isLoading">
+        <mat-spinner 
+          *ngIf="isLoading" 
+          diameter="20" 
+          class="button-spinner">
+        </mat-spinner>
+        <span *ngIf="!isLoading">Entrar</span>
+        <span *ngIf="isLoading">Entrando...</span>
+      </button>
+    </form>
+
+    <!-- Footer -->
+    <div class="login-footer">
+      <p>
+        Não tem uma conta? 
+        <button 
+          mat-button 
+          color="primary" 
+          (click)="navigateToRegister()"
+          class="register-link">
+          Cadastre-se
+        </button>
+      </p>
+    </div>
+  </div>
+
+  <!-- Background decoration -->
+  <div class="background-decoration">
+    <div class="decoration-circle circle-1"></div>
+    <div class="decoration-circle circle-2"></div>
+    <div class="decoration-circle circle-3"></div>
+  </div>
+</div>

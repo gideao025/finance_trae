@@ -1,0 +1,224 @@
+<div class="conta-list-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>account_balance</mat-icon>
+        Contas
+      </h1>
+      <p class="page-subtitle">Gerencie suas contas bancárias</p>
+    </div>
+    
+    <div class="header-actions">
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="navigateToNew()">
+        <mat-icon>add</mat-icon>
+        Nova Conta
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-container">
+        <div class="filter-row">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Buscar contas</mat-label>
+            <input 
+              matInput 
+              [(ngModel)]="searchTerm"
+              (keyup.enter)="applyFilter()"
+              placeholder="Nome da conta...">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo</mat-label>
+            <mat-select [(ngModel)]="selectedTipo">
+              <mat-option value="">Todos os tipos</mat-option>
+              <mat-option *ngFor="let tipo of tiposOptions" [value]="tipo">
+                {{ getTipoLabel(tipo) }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Instituição</mat-label>
+            <mat-select [(ngModel)]="selectedInstituicao">
+              <mat-option value="">Todas as instituições</mat-option>
+              <mat-option *ngFor="let instituicao of instituicoesOptions" [value]="instituicao">
+                {{ instituicao }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="filter-actions">
+          <button 
+            mat-raised-button 
+            color="primary" 
+            (click)="applyFilter()"
+            [disabled]="loading">
+            <mat-icon>search</mat-icon>
+            Filtrar
+          </button>
+          
+          <button 
+            mat-button 
+            (click)="clearFilters()"
+            [disabled]="loading">
+            <mat-icon>clear</mat-icon>
+            Limpar
+          </button>
+
+          <button 
+            mat-button 
+            (click)="exportToCSV()"
+            [disabled]="loading">
+            <mat-icon>download</mat-icon>
+            Exportar
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Table -->
+  <mat-card class="table-card">
+    <mat-card-content>
+      <!-- Loading -->
+      <div *ngIf="loading" class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Carregando contas...</p>
+      </div>
+
+      <!-- Table -->
+      <div *ngIf="!loading" class="table-container">
+        <table mat-table [dataSource]="dataSource" matSort class="contas-table">
+          
+          <!-- Nome Column -->
+          <ng-container matColumnDef="nome">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Nome</th>
+            <td mat-cell *matCellDef="let conta">
+              <div class="conta-info">
+                <div class="conta-nome">{{ conta.nome }}</div>
+                <div class="conta-id">ID: {{ conta.id }}</div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Tipo Column -->
+          <ng-container matColumnDef="tipo">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
+            <td mat-cell *matCellDef="let conta">
+              <mat-chip-set>
+                <mat-chip [ngClass]="'chip-' + conta.tipo.toLowerCase()">
+                  {{ getTipoLabel(conta.tipo) }}
+                </mat-chip>
+              </mat-chip-set>
+            </td>
+          </ng-container>
+
+          <!-- Instituição Column -->
+          <ng-container matColumnDef="instituicao">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Instituição</th>
+            <td mat-cell *matCellDef="let conta">
+              <span class="instituicao">{{ conta.instituicao || '-' }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Saldo Inicial Column -->
+          <ng-container matColumnDef="saldoInicial">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Saldo Inicial</th>
+            <td mat-cell *matCellDef="let conta">
+              <span class="saldo">{{ formatCurrency(conta.saldoInicial) }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Saldo Atual Column -->
+          <ng-container matColumnDef="saldoAtual">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Saldo Atual</th>
+            <td mat-cell *matCellDef="let conta">
+              <span 
+                class="saldo"
+                [ngClass]="getSaldoColor(conta.saldoAtual || 0)">
+                {{ formatCurrency(conta.saldoAtual || 0) }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Data de Criação Column -->
+          <ng-container matColumnDef="dataCriacao">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Criado em</th>
+            <td mat-cell *matCellDef="let conta">
+              <span class="data">{{ formatDate(conta.dataCriacao) }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Ações</th>
+            <td mat-cell *matCellDef="let conta">
+              <div class="actions-container">
+                <button 
+                  mat-icon-button 
+                  color="primary"
+                  (click)="navigateToView(conta)"
+                  matTooltip="Visualizar">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                
+                <button 
+                  mat-icon-button 
+                  color="accent"
+                  (click)="navigateToEdit(conta)"
+                  matTooltip="Editar">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                
+                <button 
+                  mat-icon-button 
+                  color="warn"
+                  (click)="deleteConta(conta)"
+                  matTooltip="Excluir">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        <!-- Empty State -->
+        <div *ngIf="dataSource.data.length === 0" class="empty-state">
+          <mat-icon>account_balance</mat-icon>
+          <h3>Nenhuma conta encontrada</h3>
+          <p>Crie sua primeira conta para começar a gerenciar suas finanças.</p>
+          <button 
+            mat-raised-button 
+            color="primary" 
+            (click)="navigateToNew()">
+            <mat-icon>add</mat-icon>
+            Criar Primeira Conta
+          </button>
+        </div>
+      </div>
+
+      <!-- Paginator -->
+      <mat-paginator
+        *ngIf="!loading && dataSource.data.length > 0"
+        [length]="totalElements"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="pageSizeOptions"
+        [showFirstLastButtons]="true"
+        (page)="onPageChange()"
+        aria-label="Selecione a página">
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</div>

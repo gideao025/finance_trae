@@ -1,0 +1,390 @@
+.conta-list-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 1rem;
+
+  .header-content {
+    flex: 1;
+
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0 0 0.5rem 0;
+      line-height: 1.2;
+
+      mat-icon {
+        font-size: 2rem;
+        width: 2rem;
+        height: 2rem;
+        color: #667eea;
+      }
+
+      @media (max-width: 768px) {
+        font-size: 1.5rem;
+
+        mat-icon {
+          font-size: 1.5rem;
+          width: 1.5rem;
+          height: 1.5rem;
+        }
+      }
+    }
+
+    .page-subtitle {
+      font-size: 1.1rem;
+      color: #6b7280;
+      margin: 0;
+    }
+  }
+
+  .header-actions {
+    flex-shrink: 0;
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+
+    .header-actions {
+      align-self: flex-end;
+    }
+  }
+}
+
+.filters-card, .table-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: none;
+  margin-bottom: 1.5rem;
+
+  mat-card-content {
+    padding: 1.5rem;
+  }
+}
+
+.filters-container {
+  .filter-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+
+    .search-field {
+      min-width: 300px;
+
+      @media (max-width: 768px) {
+        min-width: auto;
+      }
+    }
+  }
+
+  .filter-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+      justify-content: stretch;
+
+      button {
+        flex: 1;
+      }
+    }
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 0;
+  gap: 1rem;
+
+  p {
+    color: #6b7280;
+    font-size: 1.1rem;
+  }
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.contas-table {
+  width: 100%;
+  background: white;
+
+  th {
+    background-color: #f9fafb;
+    color: #374151;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem 0.75rem;
+  }
+
+  td {
+    padding: 1rem 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  tr:hover {
+    background-color: #f9fafb;
+  }
+
+  .conta-info {
+    .conta-nome {
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 0.25rem;
+    }
+
+    .conta-id {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+  }
+
+  .chip-corrente {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+
+  .chip-poupanca {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+
+  .chip-investimento {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+
+  .chip-outros {
+    background-color: #e5e7eb;
+    color: #374151;
+  }
+
+  .instituicao {
+    color: #374151;
+    font-weight: 500;
+  }
+
+  .saldo {
+    font-weight: 600;
+    font-family: 'Roboto Mono', monospace;
+
+    &.success {
+      color: #10b981;
+    }
+
+    &.error {
+      color: #ef4444;
+    }
+
+    &.default {
+      color: #6b7280;
+    }
+  }
+
+  .data {
+    color: #6b7280;
+    font-size: 0.875rem;
+  }
+
+  .actions-container {
+    display: flex;
+    gap: 0.25rem;
+
+    button {
+      width: 36px;
+      height: 36px;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: #6b7280;
+
+  mat-icon {
+    font-size: 4rem;
+    width: 4rem;
+    height: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+    color: #9ca3af;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 0.5rem 0;
+  }
+
+  p {
+    font-size: 1rem;
+    margin: 0 0 2rem 0;
+    max-width: 400px;
+  }
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .contas-table {
+    th, td {
+      padding: 0.75rem 0.5rem;
+    }
+
+    .actions-container {
+      flex-direction: column;
+      gap: 0.125rem;
+
+      button {
+        width: 32px;
+        height: 32px;
+
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+        }
+      }
+    }
+  }
+
+  .empty-state {
+    padding: 2rem 1rem;
+
+    mat-icon {
+      font-size: 3rem;
+      width: 3rem;
+      height: 3rem;
+    }
+
+    h3 {
+      font-size: 1.25rem;
+    }
+  }
+}
+
+// Dark theme support
+@media (prefers-color-scheme: dark) {
+  .page-header {
+    .header-content {
+      .page-title {
+        color: #e5e7eb;
+      }
+
+      .page-subtitle {
+        color: #9ca3af;
+      }
+    }
+  }
+
+  .filters-card, .table-card {
+    background-color: #1f2937;
+  }
+
+  .loading-container {
+    p {
+      color: #9ca3af;
+    }
+  }
+
+  .contas-table {
+    background: #1f2937;
+
+    th {
+      background-color: #374151;
+      color: #e5e7eb;
+    }
+
+    td {
+      border-bottom-color: #374151;
+    }
+
+    tr:hover {
+      background-color: #374151;
+    }
+
+    .conta-info {
+      .conta-nome {
+        color: #e5e7eb;
+      }
+
+      .conta-id {
+        color: #9ca3af;
+      }
+    }
+
+    .instituicao {
+      color: #e5e7eb;
+    }
+
+    .data {
+      color: #9ca3af;
+    }
+  }
+
+  .empty-state {
+    color: #9ca3af;
+
+    mat-icon {
+      color: #6b7280;
+    }
+
+    h3 {
+      color: #e5e7eb;
+    }
+  }
+}

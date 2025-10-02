@@ -1,0 +1,128 @@
+<div class="register-container">
+  <div class="register-card">
+    <!-- Header -->
+    <div class="register-header">
+      <div class="logo">
+        <mat-icon class="logo-icon">account_balance_wallet</mat-icon>
+        <h1>Controle Financeiro</h1>
+      </div>
+      <p class="subtitle">Crie sua conta para começar</p>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+      <!-- Nome Field -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nome completo</mat-label>
+        <input 
+          matInput 
+          type="text" 
+          formControlName="nome"
+          placeholder="Digite seu nome completo"
+          autocomplete="name">
+        <mat-icon matSuffix>person</mat-icon>
+        <mat-error *ngIf="registerForm.get('nome')?.invalid && registerForm.get('nome')?.touched">
+          {{ getErrorMessage('nome') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Email Field -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email</mat-label>
+        <input 
+          matInput 
+          type="email" 
+          formControlName="email"
+          placeholder="seu@email.com"
+          autocomplete="email">
+        <mat-icon matSuffix>email</mat-icon>
+        <mat-error *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+          {{ getErrorMessage('email') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Password Field -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Senha</mat-label>
+        <input 
+          matInput 
+          [type]="hidePassword ? 'password' : 'text'" 
+          formControlName="senha"
+          placeholder="Digite sua senha"
+          autocomplete="new-password">
+        <button 
+          mat-icon-button 
+          matSuffix 
+          type="button"
+          (click)="togglePasswordVisibility()"
+          [attr.aria-label]="'Hide password'"
+          [attr.aria-pressed]="hidePassword">
+          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error *ngIf="registerForm.get('senha')?.invalid && registerForm.get('senha')?.touched">
+          {{ getErrorMessage('senha') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Confirm Password Field -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Confirmar senha</mat-label>
+        <input 
+          matInput 
+          [type]="hideConfirmPassword ? 'password' : 'text'" 
+          formControlName="confirmarSenha"
+          placeholder="Confirme sua senha"
+          autocomplete="new-password">
+        <button 
+          mat-icon-button 
+          matSuffix 
+          type="button"
+          (click)="toggleConfirmPasswordVisibility()"
+          [attr.aria-label]="'Hide confirm password'"
+          [attr.aria-pressed]="hideConfirmPassword">
+          <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error *ngIf="(registerForm.get('confirmarSenha')?.invalid && registerForm.get('confirmarSenha')?.touched) || registerForm.hasError('passwordMismatch')">
+          {{ getErrorMessage('confirmarSenha') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Submit Button -->
+      <button 
+        mat-raised-button 
+        color="primary" 
+        type="submit"
+        class="register-button full-width"
+        [disabled]="isLoading">
+        <mat-spinner 
+          *ngIf="isLoading" 
+          diameter="20" 
+          class="button-spinner">
+        </mat-spinner>
+        <span *ngIf="!isLoading">Criar conta</span>
+        <span *ngIf="isLoading">Criando conta...</span>
+      </button>
+    </form>
+
+    <!-- Footer -->
+    <div class="register-footer">
+      <p>
+        Já tem uma conta? 
+        <button 
+          mat-button 
+          color="primary" 
+          (click)="navigateToLogin()"
+          class="login-link">
+          Faça login
+        </button>
+      </p>
+    </div>
+  </div>
+
+  <!-- Background decoration -->
+  <div class="background-decoration">
+    <div class="decoration-circle circle-1"></div>
+    <div class="decoration-circle circle-2"></div>
+    <div class="decoration-circle circle-3"></div>
+  </div>
+</div>

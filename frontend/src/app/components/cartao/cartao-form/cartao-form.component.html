@@ -1,0 +1,305 @@
+<div class="cartao-form-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">{{ pageTitle }}</h1>
+      <p class="page-subtitle">{{ pageSubtitle }}</p>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button (click)="onCancel()">
+        <mat-icon>arrow_back</mat-icon>
+        Voltar
+      </button>
+    </div>
+  </div>
+
+  <div class="form-content">
+    <!-- Loading Overlay -->
+    <div *ngIf="loading" class="loading-overlay">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>{{ isEditMode ? 'Carregando cartão...' : 'Salvando cartão...' }}</p>
+    </div>
+
+    <div class="form-grid">
+      <!-- Form Card -->
+      <mat-card class="form-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>credit_card</mat-icon>
+            Informações do Cartão
+          </mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <form [formGroup]="cartaoForm" (ngSubmit)="onSubmit()" class="cartao-form">
+            
+            <!-- Nome do Cartão -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Nome do Cartão</mat-label>
+              <input matInput 
+                     formControlName="nomeDoCartao"
+                     placeholder="Ex: Cartão Principal, Cartão Empresarial"
+                     maxlength="100">
+              <mat-hint>Nome para identificar o cartão</mat-hint>
+              <mat-error *ngIf="isFieldInvalid('nomeDoCartao')">
+                {{ getFieldError('nomeDoCartao') }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Bandeira e Últimos Dígitos -->
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="flex-2">
+                <mat-label>Bandeira</mat-label>
+                <mat-select formControlName="bandeira">
+                  <mat-option *ngFor="let bandeira of bandeirasOptions" [value]="bandeira">
+                    <mat-icon>{{ getBandeiraIcon(bandeira) }}</mat-icon>
+                    {{ bandeira }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="isFieldInvalid('bandeira')">
+                  {{ getFieldError('bandeira') }}
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="flex-1">
+                <mat-label>Últimos 4 Dígitos</mat-label>
+                <input matInput 
+                       formControlName="ultimosDigitos"
+                       placeholder="1234"
+                       maxlength="4"
+                       pattern="[0-9]*">
+                <mat-hint>Opcional</mat-hint>
+                <mat-error *ngIf="isFieldInvalid('ultimosDigitos')">
+                  {{ getFieldError('ultimosDigitos') }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Limites -->
+            <div class="form-section">
+              <h3 class="section-title">
+                <mat-icon>account_balance_wallet</mat-icon>
+                Limites
+              </h3>
+              
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="flex-1">
+                  <mat-label>Limite Total</mat-label>
+                  <input matInput 
+                         type="number"
+                         formControlName="limiteTotal"
+                         placeholder="0,00"
+                         min="0"
+                         step="0.01">
+                  <span matTextPrefix>R$ </span>
+                  <mat-error *ngIf="isFieldInvalid('limiteTotal')">
+                    {{ getFieldError('limiteTotal') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="flex-1">
+                  <mat-label>Limite Utilizado</mat-label>
+                  <input matInput 
+                         type="number"
+                         formControlName="limiteUtilizado"
+                         placeholder="0,00"
+                         min="0"
+                         step="0.01">
+                  <span matTextPrefix>R$ </span>
+                  <mat-hint>Valor atual utilizado</mat-hint>
+                  <mat-error *ngIf="isFieldInvalid('limiteUtilizado')">
+                    {{ getFieldError('limiteUtilizado') }}
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Limite Disponível</mat-label>
+                <input matInput 
+                       formControlName="limiteDisponivel"
+                       readonly>
+                <span matTextPrefix>R$ </span>
+                <mat-hint>Calculado automaticamente</mat-hint>
+              </mat-form-field>
+            </div>
+
+            <!-- Datas -->
+            <div class="form-section">
+              <h3 class="section-title">
+                <mat-icon>event</mat-icon>
+                Datas de Fechamento e Vencimento
+              </h3>
+              
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="flex-1">
+                  <mat-label>Dia de Fechamento</mat-label>
+                  <mat-select formControlName="diaDeFechamento">
+                    <mat-option *ngFor="let dia of diasOptions" [value]="dia">
+                      {{ dia }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-hint>Dia do mês que a fatura fecha</mat-hint>
+                  <mat-error *ngIf="isFieldInvalid('diaDeFechamento')">
+                    {{ getFieldError('diaDeFechamento') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="flex-1">
+                  <mat-label>Dia de Vencimento</mat-label>
+                  <mat-select formControlName="diaDeVencimento">
+                    <mat-option *ngFor="let dia of diasOptions" [value]="dia">
+                      {{ dia }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-hint>Dia do mês que a fatura vence</mat-hint>
+                  <mat-error *ngIf="isFieldInvalid('diaDeVencimento')">
+                    {{ getFieldError('diaDeVencimento') }}
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Observações -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Observações</mat-label>
+              <textarea matInput 
+                        formControlName="observacoes"
+                        placeholder="Informações adicionais sobre o cartão..."
+                        rows="3"
+                        maxlength="500"></textarea>
+              <mat-hint align="end">{{ cartaoForm.get('observacoes')?.value?.length || 0 }}/500</mat-hint>
+              <mat-error *ngIf="isFieldInvalid('observacoes')">
+                {{ getFieldError('observacoes') }}
+              </mat-error>
+            </mat-form-field>
+
+          </form>
+        </mat-card-content>
+
+        <!-- Actions -->
+        <mat-card-actions class="form-actions">
+          <button mat-button 
+                  type="button" 
+                  (click)="onCancel()">
+            Cancelar
+          </button>
+          <button mat-raised-button 
+                  color="primary"
+                  type="submit"
+                  [disabled]="!isFormValid || loading"
+                  (click)="onSubmit()">
+            <mat-icon>{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+            {{ submitButtonText }}
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <!-- Preview Card -->
+      <mat-card class="preview-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>visibility</mat-icon>
+            Pré-visualização
+          </mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="cartao-preview">
+            <div class="preview-header">
+              <mat-icon class="cartao-icon">{{ getBandeiraIcon(cartaoForm.get('bandeira')?.value) }}</mat-icon>
+              <div class="cartao-info">
+                <h3 class="cartao-name">{{ cartaoForm.get('nomeDoCartao')?.value || 'Nome do Cartão' }}</h3>
+                <p class="cartao-bandeira">{{ cartaoForm.get('bandeira')?.value || 'Bandeira' }}</p>
+                <p class="cartao-number" *ngIf="cartaoForm.get('ultimosDigitos')?.value">
+                  **** **** **** {{ cartaoForm.get('ultimosDigitos')?.value }}
+                </p>
+              </div>
+            </div>
+
+            <div class="preview-limits">
+              <div class="limit-item">
+                <span class="limit-label">Limite Total:</span>
+                <span class="limit-value total">{{ formatCurrency(cartaoForm.get('limiteTotal')?.value || 0) }}</span>
+              </div>
+              
+              <div class="limit-item">
+                <span class="limit-label">Utilizado:</span>
+                <span class="limit-value used">{{ formatCurrency(cartaoForm.get('limiteUtilizado')?.value || 0) }}</span>
+              </div>
+              
+              <div class="limit-item">
+                <span class="limit-label">Disponível:</span>
+                <span class="limit-value available">{{ formatCurrency(cartaoForm.get('limiteDisponivel')?.value || 0) }}</span>
+              </div>
+
+              <mat-progress-bar 
+                mode="determinate" 
+                [value]="getLimiteUtilizadoPercentage()"
+                [color]="getLimiteColor()"
+                class="limit-progress">
+              </mat-progress-bar>
+              <p class="limit-percentage">{{ getLimiteUtilizadoPercentage() | number:'1.0-1' }}% utilizado</p>
+            </div>
+
+            <div class="preview-dates">
+              <div class="date-item">
+                <mat-icon>event</mat-icon>
+                <span>Fecha dia {{ cartaoForm.get('diaDeFechamento')?.value || 1 }}</span>
+              </div>
+              <div class="date-item">
+                <mat-icon>schedule</mat-icon>
+                <span>Vence dia {{ cartaoForm.get('diaDeVencimento')?.value || 10 }}</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Help Card -->
+    <mat-card class="help-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>help_outline</mat-icon>
+          Dicas de Preenchimento
+        </mat-card-title>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="help-items">
+          <div class="help-item">
+            <mat-icon>lightbulb</mat-icon>
+            <div>
+              <strong>Nome do Cartão:</strong>
+              <p>Use um nome que facilite a identificação, como "Cartão Principal" ou "Cartão Empresarial".</p>
+            </div>
+          </div>
+          
+          <div class="help-item">
+            <mat-icon>credit_card</mat-icon>
+            <div>
+              <strong>Últimos Dígitos:</strong>
+              <p>Opcional. Ajuda na identificação do cartão físico.</p>
+            </div>
+          </div>
+          
+          <div class="help-item">
+            <mat-icon>account_balance_wallet</mat-icon>
+            <div>
+              <strong>Limites:</strong>
+              <p>O limite disponível é calculado automaticamente (Total - Utilizado).</p>
+            </div>
+          </div>
+          
+          <div class="help-item">
+            <mat-icon>event</mat-icon>
+            <div>
+              <strong>Datas:</strong>
+              <p>Fechamento é quando a fatura é gerada. Vencimento é o prazo para pagamento.</p>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

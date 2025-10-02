@@ -1,0 +1,253 @@
+<div class="transacao-form-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        {{ isEditMode ? 'Editar Transação' : 'Nova Transação' }}
+      </h1>
+      <p class="page-subtitle">
+        {{ isEditMode ? 'Atualize os dados da transação' : 'Preencha os dados para criar uma nova transação' }}
+      </p>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button (click)="onCancel()" [disabled]="isLoading">
+        <mat-icon>arrow_back</mat-icon>
+        Voltar
+      </button>
+    </div>
+  </div>
+
+  <div class="form-content">
+    <!-- Form Card -->
+    <mat-card class="form-card">
+      <!-- Loading Overlay -->
+      <div class="loading-overlay" *ngIf="isLoading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>{{ isEditMode ? 'Carregando transação...' : 'Salvando transação...' }}</p>
+      </div>
+
+      <mat-card-content>
+        <form [formGroup]="transacaoForm" (ngSubmit)="onSubmit()">
+          <div class="form-grid">
+            <!-- Descrição -->
+            <mat-form-field class="descricao-field" appearance="outline">
+              <mat-label>Descrição</mat-label>
+              <input matInput formControlName="descricao" placeholder="Ex: Compra no supermercado">
+              <mat-icon matSuffix>description</mat-icon>
+              <mat-hint>Descreva brevemente a transação</mat-hint>
+              <mat-error>{{ getFieldError('descricao') }}</mat-error>
+            </mat-form-field>
+
+            <!-- Valor -->
+            <mat-form-field appearance="outline">
+              <mat-label>Valor</mat-label>
+              <input matInput type="number" formControlName="valor" placeholder="0,00" step="0.01" min="0">
+              <span matTextPrefix>R$&nbsp;</span>
+              <mat-icon matSuffix>attach_money</mat-icon>
+              <mat-hint>Valor da transação</mat-hint>
+              <mat-error>{{ getFieldError('valor') }}</mat-error>
+            </mat-form-field>
+
+            <!-- Tipo -->
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo</mat-label>
+              <mat-select formControlName="tipo">
+                <mat-option *ngFor="let tipo of tiposTransacao" [value]="tipo">
+                  <mat-icon>{{ getTipoIcon(tipo) }}</mat-icon>
+                  {{ getTipoLabel(tipo) }}
+                </mat-option>
+              </mat-select>
+              <mat-icon matSuffix>category</mat-icon>
+              <mat-hint>Tipo da transação</mat-hint>
+              <mat-error>{{ getFieldError('tipo') }}</mat-error>
+            </mat-form-field>
+
+            <!-- Categoria -->
+            <mat-form-field appearance="outline">
+              <mat-label>Categoria</mat-label>
+              <mat-select formControlName="categoria">
+                <mat-option *ngFor="let categoria of getCategoriasDisponiveis()" [value]="categoria">
+                  <mat-icon>{{ getCategoriaIcon(categoria) }}</mat-icon>
+                  {{ getCategoriaLabel(categoria) }}
+                </mat-option>
+              </mat-select>
+              <mat-icon matSuffix>label</mat-icon>
+              <mat-hint>Categoria da transação</mat-hint>
+              <mat-error>{{ getFieldError('categoria') }}</mat-error>
+            </mat-form-field>
+
+            <!-- Data -->
+            <mat-form-field appearance="outline">
+              <mat-label>Data</mat-label>
+              <input matInput [matDatepicker]="picker" formControlName="data">
+              <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+              <mat-hint>Data da transação</mat-hint>
+              <mat-error>{{ getFieldError('data') }}</mat-error>
+            </mat-form-field>
+
+            <!-- Conta -->
+            <mat-form-field appearance="outline" [class.required-field]="isContaRequired">
+              <mat-label>Conta</mat-label>
+              <mat-select formControlName="contaId">
+                <mat-option value="">Selecione uma conta</mat-option>
+                <mat-option *ngFor="let conta of contas" [value]="conta.id">
+                  <mat-icon>{{ conta.tipo === 'CORRENTE' ? 'account_balance' : 'savings' }}</mat-icon>
+                  {{ conta.nome }} - {{ conta.instituicao }}
+                </mat-option>
+              </mat-select>
+              <mat-icon matSuffix>account_balance</mat-icon>
+              <mat-hint>{{ isContaRequired ? 'Conta obrigatória para este tipo' : 'Conta para débito/crédito' }}</mat-hint>
+              <mat-error>{{ getFieldError('contaId') }}</mat-error>
+            </mat-form-field>
+
+            <!-- Cartão (apenas para despesas) -->
+            <mat-form-field appearance="outline" *ngIf="isCartaoVisible">
+              <mat-label>Cartão</mat-label>
+              <mat-select formControlName="cartaoId">
+                <mat-option value="">Selecione um cartão</mat-option>
+                <mat-option *ngFor="let cartao of cartoes" [value]="cartao.id">
+                  <mat-icon>credit_card</mat-icon>
+                  {{ cartao.nome }} - {{ cartao.bandeira }}
+                </mat-option>
+              </mat-select>
+              <mat-icon matSuffix>credit_card</mat-icon>
+              <mat-hint>Cartão para pagamento (opcional se conta selecionada)</mat-hint>
+              <mat-error>{{ getFieldError('cartaoId') }}</mat-error>
+            </mat-form-field>
+
+            <!-- Observações -->
+            <mat-form-field class="observacoes-field" appearance="outline">
+              <mat-label>Observações</mat-label>
+              <textarea matInput formControlName="observacoes" rows="3" placeholder="Informações adicionais sobre a transação"></textarea>
+              <mat-icon matSuffix>note</mat-icon>
+              <mat-hint>Informações adicionais (opcional)</mat-hint>
+              <mat-error>{{ getFieldError('observacoes') }}</mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <button mat-stroked-button type="button" (click)="onCancel()" [disabled]="isLoading">
+              <mat-icon>cancel</mat-icon>
+              Cancelar
+            </button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="isLoading || transacaoForm.invalid">
+              <mat-icon>{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+              {{ isEditMode ? 'Atualizar' : 'Criar' }} Transação
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Preview Card -->
+    <mat-card class="preview-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>preview</mat-icon>
+          Pré-visualização
+        </mat-card-title>
+        <mat-card-subtitle>Como a transação aparecerá</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="preview-content">
+          <div class="preview-header">
+            <div class="preview-icon" [ngClass]="previewData.tipo?.toLowerCase()">
+              <mat-icon>{{ getTipoIcon(previewData.tipo) }}</mat-icon>
+            </div>
+            <div class="preview-info">
+              <h3 class="preview-descricao">{{ previewData.descricao || 'Descrição da transação' }}</h3>
+              <p class="preview-categoria">
+                <mat-icon>{{ getCategoriaIcon(previewData.categoria) }}</mat-icon>
+                {{ previewData.categoriaLabel || 'Categoria' }}
+              </p>
+            </div>
+          </div>
+
+          <div class="preview-details">
+            <div class="preview-valor" [ngClass]="previewData.tipo?.toLowerCase()">
+              {{ previewData.valorFormatado }}
+            </div>
+            
+            <div class="preview-meta">
+              <div class="meta-item" *ngIf="previewData.data">
+                <mat-icon>event</mat-icon>
+                <span>{{ previewData.data | date:'dd/MM/yyyy' }}</span>
+              </div>
+              
+              <div class="meta-item" *ngIf="previewData.conta">
+                <mat-icon>account_balance</mat-icon>
+                <span>{{ previewData.conta }}</span>
+              </div>
+              
+              <div class="meta-item" *ngIf="previewData.cartao">
+                <mat-icon>credit_card</mat-icon>
+                <span>{{ previewData.cartao }}</span>
+              </div>
+            </div>
+
+            <div class="preview-observacoes" *ngIf="previewData.observacoes">
+              <mat-icon>note</mat-icon>
+              <span>{{ previewData.observacoes }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Help Card -->
+  <mat-card class="help-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>help_outline</mat-icon>
+        Dicas de Preenchimento
+      </mat-card-title>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="help-items">
+        <div class="help-item">
+          <mat-icon color="primary">lightbulb</mat-icon>
+          <div>
+            <strong>Tipos de Transação:</strong>
+            <ul>
+              <li><strong>Receita:</strong> Dinheiro que entra (salário, freelance, etc.)</li>
+              <li><strong>Despesa:</strong> Dinheiro que sai (compras, contas, etc.)</li>
+              <li><strong>Transferência:</strong> Movimentação entre contas</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="help-item">
+          <mat-icon color="primary">account_balance</mat-icon>
+          <div>
+            <strong>Conta vs Cartão:</strong>
+            Para despesas, você pode escolher pagar com conta (débito) ou cartão (crédito).
+            Para receitas e transferências, sempre use conta.
+          </div>
+        </div>
+        
+        <div class="help-item">
+          <mat-icon color="primary">category</mat-icon>
+          <div>
+            <strong>Categorias:</strong>
+            As categorias disponíveis mudam conforme o tipo de transação selecionado.
+            Isso ajuda a organizar melhor seus gastos e receitas.
+          </div>
+        </div>
+        
+        <div class="help-item">
+          <mat-icon color="primary">description</mat-icon>
+          <div>
+            <strong>Descrição Clara:</strong>
+            Use descrições que te ajudem a lembrar da transação no futuro.
+            Ex: "Compra Supermercado XYZ" ao invés de apenas "Compra".
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

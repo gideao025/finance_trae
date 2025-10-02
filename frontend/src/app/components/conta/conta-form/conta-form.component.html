@@ -1,0 +1,177 @@
+<div class="conta-form-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>{{ isEditMode ? 'edit' : 'add' }}</mat-icon>
+        {{ pageTitle }}
+      </h1>
+      <p class="page-subtitle">
+        {{ isEditMode ? 'Edite as informações da conta' : 'Preencha as informações para criar uma nova conta' }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <mat-card class="form-card">
+    <mat-card-content>
+      <form [formGroup]="contaForm" (ngSubmit)="onSubmit()" novalidate>
+        
+        <!-- Loading Overlay -->
+        <div *ngIf="loading" class="loading-overlay">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>{{ isEditMode ? 'Salvando alterações...' : 'Criando conta...' }}</p>
+        </div>
+
+        <div class="form-grid">
+          
+          <!-- Nome -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nome da Conta *</mat-label>
+            <input 
+              matInput 
+              formControlName="nome"
+              placeholder="Ex: Conta Corrente Banco do Brasil"
+              maxlength="100">
+            <mat-hint>Nome para identificar a conta</mat-hint>
+            <mat-error *ngIf="isFieldInvalid('nome')">
+              {{ getFieldError('nome') }}
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Tipo -->
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo de Conta *</mat-label>
+            <mat-select formControlName="tipo">
+              <mat-option *ngFor="let option of tipoContaOptions" [value]="option.value">
+                <div class="tipo-option">
+                  <mat-icon>{{ option.icon }}</mat-icon>
+                  <span>{{ option.label }}</span>
+                </div>
+              </mat-option>
+            </mat-select>
+            <mat-hint>Selecione o tipo da conta</mat-hint>
+            <mat-error *ngIf="isFieldInvalid('tipo')">
+              {{ getFieldError('tipo') }}
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Instituição -->
+          <mat-form-field appearance="outline">
+            <mat-label>Instituição Financeira</mat-label>
+            <input 
+              matInput 
+              formControlName="instituicao"
+              placeholder="Ex: Banco do Brasil, Nubank, Itaú"
+              maxlength="100">
+            <mat-hint>Nome do banco ou instituição (opcional)</mat-hint>
+            <mat-error *ngIf="isFieldInvalid('instituicao')">
+              {{ getFieldError('instituicao') }}
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Saldo Inicial -->
+          <mat-form-field appearance="outline">
+            <mat-label>Saldo Inicial *</mat-label>
+            <input 
+              matInput 
+              type="number"
+              formControlName="saldoInicial"
+              placeholder="0,00"
+              step="0.01"
+              min="0">
+            <span matPrefix>R$ </span>
+            <mat-hint>Saldo atual da conta</mat-hint>
+            <mat-error *ngIf="isFieldInvalid('saldoInicial')">
+              {{ getFieldError('saldoInicial') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Preview Card -->
+        <div class="preview-section" *ngIf="contaForm.get('nome')?.value">
+          <h3>Prévia da Conta</h3>
+          <mat-card class="preview-card">
+            <mat-card-content>
+              <div class="preview-header">
+                <mat-icon class="preview-icon">
+                  {{ tipoContaOptions.find(t => t.value === contaForm.get('tipo')?.value)?.icon || 'account_balance' }}
+                </mat-icon>
+                <div class="preview-info">
+                  <div class="preview-name">{{ contaForm.get('nome')?.value }}</div>
+                  <div class="preview-type">
+                    {{ tipoContaOptions.find(t => t.value === contaForm.get('tipo')?.value)?.label || 'Tipo não selecionado' }}
+                  </div>
+                  <div class="preview-institution" *ngIf="contaForm.get('instituicao')?.value">
+                    {{ contaForm.get('instituicao')?.value }}
+                  </div>
+                </div>
+              </div>
+              <div class="preview-balance">
+                <span class="balance-label">Saldo:</span>
+                <span class="balance-value">
+                  {{ formatCurrency(contaForm.get('saldoInicial')?.value || 0) }}
+                </span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button 
+            type="button"
+            mat-button 
+            (click)="onCancel()"
+            [disabled]="loading">
+            <mat-icon>close</mat-icon>
+            Cancelar
+          </button>
+          
+          <button 
+            type="submit"
+            mat-raised-button 
+            color="primary"
+            [disabled]="contaForm.invalid || loading">
+            <mat-icon>{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+            {{ isEditMode ? 'Salvar Alterações' : 'Criar Conta' }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Help Section -->
+  <mat-card class="help-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>help_outline</mat-icon>
+        Dicas
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="help-content">
+        <div class="help-item">
+          <mat-icon>lightbulb</mat-icon>
+          <div>
+            <strong>Nome da Conta:</strong> Use um nome descritivo que facilite a identificação, como "Conta Corrente Principal" ou "Poupança Emergência".
+          </div>
+        </div>
+        
+        <div class="help-item">
+          <mat-icon>account_balance</mat-icon>
+          <div>
+            <strong>Tipo de Conta:</strong> Escolha o tipo que melhor representa sua conta para uma melhor organização.
+          </div>
+        </div>
+        
+        <div class="help-item">
+          <mat-icon>monetization_on</mat-icon>
+          <div>
+            <strong>Saldo Inicial:</strong> Informe o saldo atual da conta. Este valor será usado como ponto de partida para seus controles.
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
