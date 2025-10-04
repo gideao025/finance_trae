@@ -41,7 +41,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
 // Layout Components
-import { LayoutComponent } from './components/layout/layout.component';
+import { MainLayoutComponent } from './components/layout/layout.component';
 import { HeaderComponent } from './components/layout/header/header.component';
 import { SidebarComponent } from './components/layout/sidebar/sidebar.component';
 
@@ -80,7 +80,7 @@ import { ErrorInterceptor } from './interceptors/error.interceptor';
     AppComponent,
     
     // Layout
-    LayoutComponent,
+    MainLayoutComponent,
     HeaderComponent,
     SidebarComponent,
     

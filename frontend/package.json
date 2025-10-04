@@ -30,8 +30,7 @@
     "ngx-mask": "^16.4.0",
     "ngx-currency": "^3.0.0",
     "date-fns": "^2.30.0",
-    "lucide-angular": "^0.294.0",
-    "@tabler/icons-angular": "^2.44.0"
+    "lucide-angular": "^0.294.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^17.0.0",

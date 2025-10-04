@@ -53,13 +53,13 @@ public class JwtUtil {
      * Extrai todos os claims do token
      */
     private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
+        return Jwts.parser()
+                .verifyWith(getSigningKey())   // precisa ser SecretKey
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
-    
+
     /**
      * Verifica se o token está expirado
      */

@@ -7,7 +7,7 @@ import { AuthGuard } from './guards/auth.guard';
 // Components
 import { LoginComponent } from './components/auth/login/login.component';
 import { RegisterComponent } from './components/auth/register/register.component';
-import { LayoutComponent } from './components/layout/layout.component';
+import { MainLayoutComponent } from './components/layout/main-layout/main-layout.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { ContaListComponent } from './components/conta/conta-list/conta-list.component';
 import { ContaFormComponent } from './components/conta/conta-form/conta-form.component';
@@ -32,7 +32,7 @@ const routes: Routes = [
   // Rotas protegidas (com autenticação)
   {
     path: '',
-    component: LayoutComponent,
+    component: MainLayoutComponent,
     canActivate: [AuthGuard],
     children: [
       {

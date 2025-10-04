@@ -89,7 +89,7 @@ public class UsuarioService {
      */
     @Transactional(readOnly = true)
     public List<Usuario> listarUsuariosAtivos() {
-        return usuarioRepository.findByAtivoTrueOrderByNomeAsc();
+        return usuarioRepository.findByAtivoOrderByNomeAsc(true);
     }
     
     /**
@@ -171,7 +171,7 @@ public class UsuarioService {
      */
     @Transactional(readOnly = true)
     public long contarUsuariosAtivos() {
-        return usuarioRepository.countByAtivoTrue();
+        return usuarioRepository.countByAtivo(true);
     }
     
     /**
